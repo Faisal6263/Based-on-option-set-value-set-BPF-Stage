@@ -1,0 +1,135 @@
+function AdvanceBPF(executionContext) {
+    debugger;
+        var formContext = executionContext.getFormContext();
+    
+        var Stage1 = "95f2871b-94b1-40f9-b9ec-a38fa79201c5";
+        var Stage2 = "47b10d73-139b-4b5a-aa92-cd3a04c71467";
+       // var Stage3 = "724cf31c-4116-4b16-91ba-31615a2586ad";
+        
+        var entity = {};
+        entity["activestageid@odata.bind"] = "/processstages(" + Stage2 + ")"; 
+        entity["traversedpath"] = Stage1 + "," + Stage2;
+    
+      var BPFId = "d4fa6965-9b33-ee11-bdf4-000d3a341f51";
+    
+    //   14bde4cc-fe31-ee11-bdf3-000d3a341f51
+     
+      var req = new XMLHttpRequest();
+      req.open("PATCH", Xrm.Utility.getGlobalContext().getClientUrl() + "/api/data/v9.2/new_itemmovingbpfs(" + BPFId + 
+    ")", true);
+      req.setRequestHeader("OData-MaxVersion", "4.0");
+      req.setRequestHeader("OData-Version", "4.0");
+      req.setRequestHeader("Accept", "application/json");
+      req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+      req.onreadystatechange = function() {
+          if (this.readyState === 4) {
+              req.onreadystatechange = null;
+     
+              if (this.status === 204) {
+                  alert("Success");
+              } else {
+                  alert("Error");
+              }
+          }
+      };
+      req.send(JSON.stringify(entity));
+    }
+
+    
+
+
+
+
+
+
+
+
+// This code works exactly as needed  ------------------------>
+
+
+    function AdvanceBPF(executionContext) {
+        var formContext = executionContext.getFormContext();
+    
+        // Get the option set value from the form context
+        var optionSetValue = formContext.getAttribute("new_movingbpf").getValue();
+    
+        // Set the stage based on the option set value
+        var stageId;
+        if (optionSetValue === 100000000) { // Assuming 100000001 corresponds to "Pending" option value
+            stageId = "95f2871b-94b1-40f9-b9ec-a38fa79201c5";
+        } else if (optionSetValue === 100000001) { // Assuming 100000002 corresponds to "Approval" option value
+            stageId = "47b10d73-139b-4b5a-aa92-cd3a04c71467";
+        } 
+        
+        else if (optionSetValue === 100000002) { // Assuming 100000003 corresponds to "Accepted" option value
+            stageId = "724cf31c-4116-4b16-91ba-31615a2586ad";
+        } 
+        
+        else if (optionSetValue === 100000003) { // Assuming 100000003 corresponds to "Accepted" option value
+            stageId = "44922117-b10a-4f9a-ae8e-53c12faff940";
+        } 
+        
+        else if (optionSetValue === 100000004) { // Assuming 100000003 corresponds to "Accepted" option value
+            stageId = "8d43e3f7-d02d-4520-b418-55cc66220446";
+        } 
+        
+        else {
+            // If none of the expected option set values match, handle the error or default case
+            alert("Invalid option set value.");
+            return;
+        }
+    
+        // Retrieve the business process flow instance ID dynamically
+        var recordId = formContext.data.process.getInstanceId();
+    
+        // Make a retrieve request to get the current traversed path
+        var req = new XMLHttpRequest();
+        req.open("GET", Xrm.Utility.getGlobalContext().getClientUrl() + "/api/data/v9.2/new_itemmovingbpfs(" + recordId + ")", true);
+        req.setRequestHeader("OData-MaxVersion", "4.0");
+        req.setRequestHeader("OData-Version", "4.0");
+        req.setRequestHeader("Accept", "application/json");
+        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        req.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                req.onreadystatechange = null;
+    
+                if (this.status === 200) {
+                    // Parse the response
+                    var response = JSON.parse(req.responseText);
+                    // Get the traversedpath value from the response
+                    var currentTraversedPath = response.traversedpath || "";
+                    // Append the new stageId to the existing traversed path
+                    var updatedTraversedPath = currentTraversedPath ? currentTraversedPath + "," + stageId : stageId;
+    
+                    // Prepare the entity object for the update request
+                    var entity = {};
+                    entity["activestageid@odata.bind"] = "/processstages(" + stageId + ")";
+                    entity["traversedpath"] = updatedTraversedPath;
+    
+                    // Perform the update request
+                    var updateReq = new XMLHttpRequest();
+                    updateReq.open("PATCH", Xrm.Utility.getGlobalContext().getClientUrl() + "/api/data/v9.2/new_itemmovingbpfs(" + recordId + ")", true);
+                    updateReq.setRequestHeader("OData-MaxVersion", "4.0");
+                    updateReq.setRequestHeader("OData-Version", "4.0");
+                    updateReq.setRequestHeader("Accept", "application/json");
+                    updateReq.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                    updateReq.onreadystatechange = function() {
+                        if (this.readyState === 4) {
+                            updateReq.onreadystatechange = null;
+    
+                            if (this.status === 204) {
+                                alert("Success");
+                            } else {
+                                alert("Error");
+                            }
+                        }
+                    };
+                    updateReq.send(JSON.stringify(entity));
+                } else {
+                    alert("Error");
+                }
+            }
+        };
+        req.send();
+    }
+    
